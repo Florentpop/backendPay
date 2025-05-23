@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost.com','https://hotspot-backend-dlwy.onrender.com']
+  origin: ['http://localhost.com','https://hotspot-backend-dlwy.onrender.com','http://127.0.0.1:5500']
 }));
 app.use(bodyParser.json());
 
