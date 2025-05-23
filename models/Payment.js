@@ -9,6 +9,7 @@ const PaymentSchema = new mongoose.Schema({
   gateway_response: { type: String },
   paid_at: { type: Date },
   packageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Package' },
+  voucherCode: {type:String},
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -5,7 +5,7 @@ const VoucherSchema = new mongoose.Schema({
   package: { type: String, required: true },
   price: { type: Number, required: true },
   used: { type: Boolean, default: false },
-  assignedTo: { type: String },
+  assignedTo: { type: String, default: null },
   usedAt: { type: Date }
 });
 

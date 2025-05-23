@@ -22,7 +22,9 @@ exports.verifyPayment = async (req, res) => {
     console.log('✅ Paystack data:', data);
     
     if (data.status && data.data.status === 'success') {
-      const phone = data.data.customer.phone || data.data.authorization?.mobile_money_number;
+      const phone =
+        data.data.customer.phone ||
+        data.data.authorization?.mobile_money_number;
 
       const payment = new Payment({
         reference,
@@ -31,66 +33,77 @@ exports.verifyPayment = async (req, res) => {
         // phone: data.data.authorization.mobile_money_number,
         phone,
         status: data.data.status,
-        customer: data.data.customer.email || 'anonymous'
+        customer: data.data.customer.email || "anonymous",
       });
 
       await payment.save();
-      console.log('💾 Payment saved:', payment);
+      console.log("💾 Payment saved:", payment);
 
       // Look for an unused voucher matching the package and price
       const voucher = await Voucher.findOneAndUpdate(
         { package: packageName, price: amount, used: false },
-        { used: true, assignedTo: payment.customer, usedAt: new Date() },
+        {
+          used: true,
+          assignedTo: data.data.customer.phone,
+          usedAt: new Date(),
+        },
         { new: true }
       );
 
       if (!voucher) {
-        console.warn('⚠️ No available voucher found');
+        console.warn("⚠️ No available voucher found");
         return res.status(200).json({
-          message: 'Payment verified, but no voucher is available.',
-          success: false
+          message: "Payment verified, but no voucher is available.",
+          success: false,
         });
       }
 
-      console.log('🎫 Voucher assigned:', voucher.code);
+      // 👉 Update the payment with voucher code
+      payment.voucherCode = voucher.code;
+      await payment.save(); // Save again after updating
+      
+      console.log("🎫 Voucher assigned:", voucher.code);
+      console.log(voucher);
 
       // ✅ Send SMS to mobile_money_number
       if (phone) {
-        const formattedNumber = phone.startsWith('+')
+        const formattedNumber = phone.startsWith("+")
           ? phone
-          : `+233${phone.replace(/^0/, '')}`;
+          : `+233${phone.replace(/^0/, "")}`;
 
         try {
           const smsResponse = await axios.post(
-            'https://sms.arkesel.com/api/v2/sms/send',
+            "https://sms.arkesel.com/api/v2/sms/send",
             {
-              sender: 'Flosel Wifi',
+              sender: "Flosel Wifi",
               message: `Your Flosel WiFi voucher: ${voucher.code}. Thank you!`,
-              recipients: [formattedNumber]
+              recipients: [formattedNumber],
             },
             {
               headers: {
-                'api-key': process.env.ARKESEL_API_KEY,
-                'Content-Type': 'application/json'
-              }
+                "api-key": process.env.ARKESEL_API_KEY,
+                "Content-Type": "application/json",
+              },
             }
           );
 
-          console.log('📲 SMS sent:', smsResponse.data);
+          console.log("📲 SMS sent:", smsResponse.data);
         } catch (smsError) {
-          console.error('❌ Failed to send SMS:', smsError.response?.data || smsError.message);
+          console.error(
+            "❌ Failed to send SMS:",
+            smsError.response?.data || smsError.message
+          );
         }
       } else {
-        console.warn('⚠️ mobile_money_number not found. SMS not sent.');
+        console.warn("⚠️ mobile_money_number not found. SMS not sent.");
       }
-
 
       return res.status(200).json({
         message: `Payment verified! Your voucher code is: ${voucher.code}`,
         // message: 'Payment verified and voucher issued successfully' voucher.code,
         success: true,
         voucher: voucher.code,
-        package: voucher.package
+        package: voucher.package,
       });
     } else {
       return res.status(400).json({
