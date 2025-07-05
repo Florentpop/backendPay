@@ -1,4 +1,5 @@
 const Package = require('../models/Package'); // adjust path as needed
+const Voucher = require('../models/Voucher');
 
 // Get all packages
 exports.getAllPackages = async (req, res) => {
@@ -7,6 +8,34 @@ exports.getAllPackages = async (req, res) => {
     res.json(packages);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getActivePackages = async (req, res) => {
+  try {
+    // Only fetch packages that are active
+    const packages = await Package.find({ active: true });
+
+    // Get all unused vouchers
+    const vouchers = await Voucher.find({ used: false });
+
+    // Count available vouchers per package
+    const voucherCount = {};
+    vouchers.forEach(v => {
+      voucherCount[v.package] = (voucherCount[v.package] || 0) + 1;
+    });
+
+    // Merge available count into package list
+    const results = packages.map(pkg => ({
+      name: pkg.name,
+      price: pkg.price,
+      active: pkg.active,
+      available: voucherCount[pkg.name] || 0
+    }));
+
+    res.status(200).json(results);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch packages' });
   }
 };
 

@@ -62,7 +62,7 @@ exports.verifyPayment = async (req, res) => {
             'https://sms.arkesel.com/api/v2/sms/send',
             {
               sender: 'Flosel Wifi',
-              message: `Your Flosel WiFi voucher: ${voucher.code}. Thank you!`,
+              message: `Flosel WiFi Voucher Code: ${voucher.code}. To Check Status: flosel.hub/status`,
               recipients: [formattedNumber]
             },
             {
