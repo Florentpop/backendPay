@@ -5,7 +5,8 @@ const PackageSchema = new Schema({
   name: { type: String, required: true },
   active: { type: Boolean, default: true },
   duration: { type: String, default: 'Non-expire' },
-  price: { type: Number, required: true, min: 0 }
+  price: { type: Number, required: true, min: 0 },
+ category: { type: String, default: 'data' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Package', PackageSchema);

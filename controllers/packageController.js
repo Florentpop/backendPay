@@ -30,6 +30,7 @@ exports.getActivePackages = async (req, res) => {
       name: pkg.name,
       price: pkg.price,
       active: pkg.active,
+      category: pkg.category,
       available: voucherCount[pkg.name] || 0
     }));
 
@@ -52,8 +53,8 @@ exports.getPackageById = async (req, res) => {
 
 // Create a new package
 exports.createPackage = async (req, res) => {
-  const { name, active, duration, price } = req.body;
-  const pkg = new Package({ name, active, duration, price });
+  const { name, active, duration, price,category } = req.body;
+  const pkg = new Package({ name, active, duration, price,category });
 
   try {
     const newPackage = await pkg.save();
@@ -69,13 +70,15 @@ exports.updatePackage = async (req, res) => {
     const pkg = await Package.findById(req.params.id);
     if (!pkg) return res.status(404).json({ message: 'Package not found' });
 
-    const { name, active, duration, price } = req.body;
+    const { name, active, duration, price,category } = req.body;
 
     // if (id !== undefined) pkg.id = id;
     if (name !== undefined) pkg.name = name;
     if (active !== undefined) pkg.active = active;
     if (duration !== undefined) pkg.duration = duration;
     if (price !== undefined) pkg.price = price;
+    if (category !== undefined) pkg.category = category;
+
 
     const updatedPackage = await pkg.save();
     res.json(updatedPackage);
