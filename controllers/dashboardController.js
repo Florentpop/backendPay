@@ -1,7 +1,7 @@
 const Package = require('../models/Package');
 const Voucher = require('../models/Voucher');
 const Payment = require('../models/Payment');
-const Voucher = require('../models/Voucher');
+
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -48,7 +48,7 @@ exports.getSalesStats = async (req, res) => {
 
 // 🧮 Top-Selling Packages
 // 📈 Top-Selling Packages based on voucher usage
-// controllers/dashboardController.j
+// controllers/dashboardController.j        
 
 // 📈 Top-Selling Packages based on used vouchers
 exports.getTopSellingPackages = async (req, res) => {
@@ -59,6 +59,7 @@ exports.getTopSellingPackages = async (req, res) => {
       {
         $group: {
           _id: "$package", // use your actual field name here
+          
           totalSales: { $sum: "$price" },
           count: { $sum: 1 }
         }
