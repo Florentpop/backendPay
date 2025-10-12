@@ -57,18 +57,34 @@ exports.getTopSellingPackages = async (req, res) => {
 
       // ✅ Group by package name
       {
-        $group: {
-          _id: "$package",
-          totalSales: { $sum: "$price" },
-          count: { $sum: 1 }
-        }
-      },
+  $group: {
+    _id: "$package",
+    totalSales: { $sum: "$price" },
+    count: { $sum: 1 }
+  }
+},
+{
+  $group: {
+    _id: null,
+    packages: { $push: "$$ROOT" },
+    grandTotal: { $sum: "$totalSales" }
+  }
+},
+{ $unwind: "$packages" },
+{
+  $project: {
+    _id: "$packages._id",
+    totalSales: "$packages.totalSales",
+    count: "$packages.count",
+    percentage: {
+      $round: [
+        { $multiply: [{ $divide: ["$packages.totalSales", "$grandTotal"] }, 100] },
+        2
+      ]
+    }
+  }
+}
 
-      // ✅ Sort by total sales (descending)
-      { $sort: { totalSales: -1 } },
-
-      // ✅ Limit to top 5
-      { $limit: 5 }
     ]);
 
     res.status(200).json({
