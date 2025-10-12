@@ -46,31 +46,16 @@ exports.getSalesStats = async (req, res) => {
 };
 
 // 🧮 Top-Selling Packages
-const Payment = require('../models/Payment');
-
 exports.getTopSellingPackages = async (req, res) => {
   try {
     const topPackages = await Payment.aggregate([
-      // 1️⃣ Join the Package collection
-      {
-        $lookup: {
-          from: "packages",              // collection name (lowercase plural of model)
-          localField: "packageId",       // field in Payment
-          foreignField: "_id",           // field in Package
-          as: "packageInfo"              // output array
-        }
-      },
-      // 2️⃣ Flatten the joined array
-      { $unwind: "$packageInfo" },
-      // 3️⃣ Group by the package name
       {
         $group: {
-          _id: "$packageInfo.name",
+          _id: "$packageName",
           totalSales: { $sum: "$amount" },
           count: { $sum: 1 }
         }
       },
-      // 4️⃣ Sort and limit to top 5
       { $sort: { totalSales: -1 } },
       { $limit: 5 }
     ]);
