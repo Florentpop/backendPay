@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost.com','https://hotspot-backend-dlwy.onrender.com','http://127.0.0.1:5500', 'http://flosel.hub'],
+  origin: ['http://localhost.com','https://hotspot-backend-dlwy.onrender.com','http://127.0.0.1:5500', 'http://flosel.hub','http://flosel.com','https://flosel.com','http://localhost:5173'],
   credentials: true
 }));
 app.use(bodyParser.json());
