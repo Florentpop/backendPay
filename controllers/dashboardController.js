@@ -1,6 +1,7 @@
 const Package = require('../models/Package');
 const Voucher = require('../models/Voucher');
 const Payment = require('../models/Payment');
+const Voucher = require('../models/Voucher');
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -46,22 +47,39 @@ exports.getSalesStats = async (req, res) => {
 };
 
 // 🧮 Top-Selling Packages
+
+// 📈 Top-Selling Packages based on voucher usage
 exports.getTopSellingPackages = async (req, res) => {
   try {
-    const topPackages = await Payment.aggregate([
+    const topPackages = await Voucher.aggregate([
+      // ✅ Consider only used vouchers
+      { $match: { used: true } },
+
+      // ✅ Group by package name
       {
         $group: {
-          _id: "$packageName",
-          totalSales: { $sum: "$amount" },
+          _id: "$package",
+          totalSales: { $sum: "$price" },
           count: { $sum: 1 }
         }
       },
+
+      // ✅ Sort by total sales (descending)
       { $sort: { totalSales: -1 } },
+
+      // ✅ Limit to top 5
       { $limit: 5 }
     ]);
 
-    res.status(200).json({ success: true, data: topPackages });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(200).json({
+      success: true,
+      data: topPackages
+    });
+  } catch (error) {
+    console.error("❌ Error getting top-selling packages:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
