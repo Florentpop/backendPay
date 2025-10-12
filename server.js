@@ -7,6 +7,8 @@ const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const voucherRoutes = require('./routes/voucherRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api', paymentRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/vouchers', voucherRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
 
 // List all packages
 // app.get('/api/packages', async (req, res) => {
