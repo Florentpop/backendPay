@@ -47,64 +47,40 @@ exports.getSalesStats = async (req, res) => {
 };
 
 // 🧮 Top-Selling Packages
-
 // 📈 Top-Selling Packages based on voucher usage
 exports.getTopSellingPackages = async (req, res) => {
   try {
-    const topPackages = await Voucher.aggregate([
-      // ✅ Only count used vouchers
+    // Step 1️⃣: Group by package name (ensure correct field)
+    const grouped = await Voucher.aggregate([
       { $match: { used: true } },
-
-      // ✅ Group by package name
       {
         $group: {
-          _id: "$package",
+          _id: "$package", // ⚠️ Make sure this matches your field name (use "$packageName" if that's your schema)
           totalSales: { $sum: "$price" },
           count: { $sum: 1 }
         }
       },
-
-      // ✅ Calculate total sales sum for percentage
-      {
-        $group: {
-          _id: null,
-          packages: { $push: "$$ROOT" },
-          grandTotal: { $sum: "$totalSales" }
-        }
-      },
-
-      // ✅ Flatten packages array
-      { $unwind: "$packages" },
-
-      // ✅ Compute percentage for each package
-      {
-        $project: {
-          _id: "$packages._id",
-          totalSales: "$packages.totalSales",
-          count: "$packages.count",
-          percentage: {
-            $round: [
-              { $multiply: [{ $divide: ["$packages.totalSales", "$grandTotal"] }, 100] },
-              2
-            ]
-          }
-        }
-      },
-
-      // ✅ Sort and limit to top 5
-      { $sort: { totalSales: -1 } },
-      { $limit: 5 }
+      { $sort: { totalSales: -1 } }
     ]);
 
-    res.status(200).json({
-      success: true,
-      data: topPackages
-    });
+    if (!grouped.length) {
+      return res.status(200).json([]);
+    }
+
+    // Step 2️⃣: Compute grand total to calculate percentage
+    const grandTotal = grouped.reduce((sum, pkg) => sum + pkg.totalSales, 0);
+
+    // Step 3️⃣: Add percentage share
+    const finalData = grouped.map(pkg => ({
+      _id: pkg._id,
+      totalSales: pkg.totalSales,
+      count: pkg.count,
+      percentage: Number(((pkg.totalSales / grandTotal) * 100).toFixed(2))
+    }));
+
+    res.status(200).json(finalData);
   } catch (error) {
     console.error("❌ Error getting top-selling packages:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ message: error.message });
   }
 };
