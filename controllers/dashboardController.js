@@ -44,3 +44,25 @@ exports.getSalesStats = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// 🧮 Top-Selling Packages
+exports.getTopSellingPackages = async (req, res) => {
+  try {
+    // Count how many times each package has been purchased
+    const topPackages = await Payment.aggregate([
+      {
+        $group: {
+          _id: "$packageName", // assuming each Payment doc stores packageName
+          totalSales: { $sum: "$amount" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { totalSales: -1 } },
+      { $limit: 5 }
+    ]);
+
+    res.status(200).json({ success: true, data: topPackages });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
