@@ -48,39 +48,40 @@ exports.getSalesStats = async (req, res) => {
 
 // 🧮 Top-Selling Packages
 // 📈 Top-Selling Packages based on voucher usage
+// controllers/dashboardController.j
+
+// 📈 Top-Selling Packages based on used vouchers
 exports.getTopSellingPackages = async (req, res) => {
   try {
-    // Step 1️⃣: Group by package name (ensure correct field)
+    // Step 1️⃣ Group by package field
     const grouped = await Voucher.aggregate([
-      { $match: { used: true } },
+      { $match: { used: true } }, // only used vouchers
       {
         $group: {
-          _id: "$package", // ⚠️ Make sure this matches your field name (use "$packageName" if that's your schema)
+          _id: "$package", // use your actual field name here
           totalSales: { $sum: "$price" },
           count: { $sum: 1 }
         }
       },
-      { $sort: { totalSales: -1 } }
+      { $sort: { totalSales: -1 } } // highest total first
     ]);
 
-    if (!grouped.length) {
-      return res.status(200).json([]);
-    }
+    // Step 2️⃣ Compute grand total for percentage calculation
+    const grandTotal = grouped.reduce((sum, item) => sum + item.totalSales, 0);
 
-    // Step 2️⃣: Compute grand total to calculate percentage
-    const grandTotal = grouped.reduce((sum, pkg) => sum + pkg.totalSales, 0);
-
-    // Step 3️⃣: Add percentage share
-    const finalData = grouped.map(pkg => ({
+    // Step 3️⃣ Add percentage to each package result
+    const formatted = grouped.map(pkg => ({
       _id: pkg._id,
       totalSales: pkg.totalSales,
       count: pkg.count,
       percentage: Number(((pkg.totalSales / grandTotal) * 100).toFixed(2))
     }));
 
-    res.status(200).json(finalData);
+    // Step 4️⃣ Send clean JSON output (no wrapper object)
+    return res.status(200).json(formatted);
+
   } catch (error) {
-    console.error("❌ Error getting top-selling packages:", error);
-    res.status(500).json({ message: error.message });
+    console.error("❌ Error computing top-selling packages:", error);
+    return res.status(500).json({ message: error.message });
   }
 };
