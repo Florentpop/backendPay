@@ -48,11 +48,22 @@ exports.getSalesStats = async (req, res) => {
 // 🧮 Top-Selling Packages
 exports.getTopSellingPackages = async (req, res) => {
   try {
-    // Count how many times each package has been purchased
     const topPackages = await Payment.aggregate([
+      // Join Package collection
+      {
+        $lookup: {
+          from: "packages",
+          localField: "packageId",
+          foreignField: "_id",
+          as: "packageInfo"
+        }
+      },
+      // Flatten packageInfo array
+      { $unwind: "$packageInfo" },
+      // Group by package name
       {
         $group: {
-          _id: "$packageName", // assuming each Payment doc stores packageName
+          _id: "$packageInfo.name",
           totalSales: { $sum: "$amount" },
           count: { $sum: 1 }
         }
