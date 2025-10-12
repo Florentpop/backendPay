@@ -52,39 +52,48 @@ exports.getSalesStats = async (req, res) => {
 exports.getTopSellingPackages = async (req, res) => {
   try {
     const topPackages = await Voucher.aggregate([
-      // ✅ Consider only used vouchers
+      // ✅ Only count used vouchers
       { $match: { used: true } },
 
       // ✅ Group by package name
       {
-  $group: {
-    _id: "$package",
-    totalSales: { $sum: "$price" },
-    count: { $sum: 1 }
-  }
-},
-{
-  $group: {
-    _id: null,
-    packages: { $push: "$$ROOT" },
-    grandTotal: { $sum: "$totalSales" }
-  }
-},
-{ $unwind: "$packages" },
-{
-  $project: {
-    _id: "$packages._id",
-    totalSales: "$packages.totalSales",
-    count: "$packages.count",
-    percentage: {
-      $round: [
-        { $multiply: [{ $divide: ["$packages.totalSales", "$grandTotal"] }, 100] },
-        2
-      ]
-    }
-  }
-}
+        $group: {
+          _id: "$package",
+          totalSales: { $sum: "$price" },
+          count: { $sum: 1 }
+        }
+      },
 
+      // ✅ Calculate total sales sum for percentage
+      {
+        $group: {
+          _id: null,
+          packages: { $push: "$$ROOT" },
+          grandTotal: { $sum: "$totalSales" }
+        }
+      },
+
+      // ✅ Flatten packages array
+      { $unwind: "$packages" },
+
+      // ✅ Compute percentage for each package
+      {
+        $project: {
+          _id: "$packages._id",
+          totalSales: "$packages.totalSales",
+          count: "$packages.count",
+          percentage: {
+            $round: [
+              { $multiply: [{ $divide: ["$packages.totalSales", "$grandTotal"] }, 100] },
+              2
+            ]
+          }
+        }
+      },
+
+      // ✅ Sort and limit to top 5
+      { $sort: { totalSales: -1 } },
+      { $limit: 5 }
     ]);
 
     res.status(200).json({
