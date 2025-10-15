@@ -30,12 +30,12 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error("MongoDB error:", err));
 
 // Routes
-app.use('/api', paymentRoutes);
+// app.use('/api', paymentRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-// app.use('/api/payments', paymentRoutes);
+app.use('/api/payments', paymentRoutes);
 
 
 // List all packages
