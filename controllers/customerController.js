@@ -140,3 +140,14 @@ exports.addToGroup = async (req, res) => {
     res.status(500).json({ message: "Error adding to group", error });
   }
 };
+
+// GET /api/customers/payments/:phone
+exports.getCustomerPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find({ phone: req.params.phone }).sort({ createdAt: -1 });
+    res.status(200).json(payments);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching payments', error });
+  }
+};
+
