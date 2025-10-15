@@ -35,6 +35,7 @@ app.use('/api/packages', packageRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+// app.use('/api/payments', paymentRoutes);
 
 
 // List all packages

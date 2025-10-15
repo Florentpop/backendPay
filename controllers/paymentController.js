@@ -103,3 +103,66 @@ exports.verifyPayment = async (req, res) => {
     });
   }
 };
+
+
+// ✅ Get all payments
+exports.getAllPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find().sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      count: payments.length,
+      data: payments
+    });
+  } catch (error) {
+    console.error('❌ Error fetching payments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching payments',
+      error: error.message
+    });
+  }
+};
+
+// ✅ Get single payment by reference
+exports.getPaymentByReference = async (req, res) => {
+  try {
+    const payment = await Payment.findOne({ reference: req.params.reference });
+    if (!payment)
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+
+    res.status(200).json({ success: true, data: payment });
+  } catch (error) {
+    console.error('❌ Error fetching payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching payment',
+      error: error.message
+    });
+  }
+};
+
+// ✅ Get payments by phone or customer (optional filter)
+exports.searchPayments = async (req, res) => {
+  try {
+    const { phone, customer } = req.query;
+    const query = {};
+
+    if (phone) query.phone = phone;
+    if (customer) query.customer = { $regex: customer, $options: 'i' };
+
+    const payments = await Payment.find(query).sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      count: payments.length,
+      data: payments
+    });
+  } catch (error) {
+    console.error('❌ Error searching payments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error searching payments',
+      error: error.message
+    });
+  }
+};
