@@ -8,6 +8,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const voucherRoutes = require('./routes/voucherRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const customerRoutes = require('./routes/customerRoutes');
 
 
 
@@ -36,6 +37,8 @@ app.use('/api/announcement', announcementRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/customers', customerRoutes);
+
 
 
 // List all packages
