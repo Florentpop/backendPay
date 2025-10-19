@@ -148,14 +148,31 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// 🗑️ Delete user
+// 🗑️ Delete user (prevent deleting admins)
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Find the user we’re trying to delete
+    const userToDelete = await User.findById(id);
+    if (!userToDelete) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🚫 Prevent deleting admin or superadmin accounts
+    if (["admin", "superadmin"].includes(userToDelete.role)) {
+      return res.status(403).json({ message: "Admin accounts cannot be deleted" });
+    }
+
+    // Delete the user if allowed
     await User.findByIdAndDelete(id);
+
+    // Log the deletion (optional if you use activity logs)
     await logActivity(req.user.id, "Deleted User", `Deleted user ID: ${id}`);
-    res.status(200).json({ success: true, message: "User deleted" });
+
+    res.status(200).json({ success: true, message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
