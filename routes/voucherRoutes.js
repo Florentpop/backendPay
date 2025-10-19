@@ -16,6 +16,6 @@ router.get('/', voucherController.getVouchers);
 router.get('/:code', voucherController.getVoucherByCode);
 
 // Use a voucher
-router.patch('/:code/use', voucherController.useVoucher);
+router.patch('/use/:code', voucherController.useVoucher);
 
 module.exports = router;
