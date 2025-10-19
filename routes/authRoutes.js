@@ -1,14 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const { login, registerAdmin, verifyToken } = require("../controllers/authController");
+const {
+  registerAdmin,
+  login,
+  verifyToken,
+  requireAdmin,
+  createUser,
+  getUsers,
+  updateUser,
+  deleteUser,
+} = require("../controllers/authController");
+const { getActivityLogs } = require("../controllers/activityController");
 
-// Only use register once to create admin
-router.post("/register", registerAdmin);
+// Public
 router.post("/login", login);
+router.post("/register-admin", registerAdmin);
 
-// Example of a protected route
-router.get("/check", verifyToken, (req, res) => {
-  res.json({ message: "Token valid", user: req.user });
-});
+// Admin-only
+router.post("/create-user", verifyToken, requireAdmin, createUser);
+router.get("/users", verifyToken, requireAdmin, getUsers);
+router.put("/users/:id", verifyToken, requireAdmin, updateUser);
+router.delete("/users/:id", verifyToken, requireAdmin, deleteUser);
+
+router.get("/activity-logs", verifyToken, requireAdmin, getActivityLogs);
 
 module.exports = router;
