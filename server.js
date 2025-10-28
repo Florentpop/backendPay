@@ -10,6 +10,7 @@ const voucherRoutes = require('./routes/voucherRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const authRoutes = require("./routes/authRoutes");
+const carouselRoutes = require('./routes/carouselRoutes');
 
 
 
@@ -18,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: ['https://hotspot-admin-dashboard.onrender.com','https://hotspot-backend-dlwy.onrender.com','http://127.0.0.1:5500','http://localhost:5173'],
+  origin: ['http://localhost.com','https://hotspot-backend-dlwy.onrender.com','http://127.0.0.1:5500', 'http://192.168.88.1','http://192.168.88.1/login.html','http://localhost:5173'],
   credentials: true
 }));
 app.use(bodyParser.json());
@@ -40,8 +41,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/customers', customerRoutes);
 app.use("/api/auth", authRoutes);
-
-
+app.use('/api/carousel',carouselRoutes);    
 
 // List all packages
 // app.get('/api/packages', async (req, res) => {
