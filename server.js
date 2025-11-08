@@ -40,6 +40,7 @@ app.use('/api/announcement', announcementRoutes);
 app.use('/api/vouchers', voucherRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/', paymentRoutes);
 app.use('/api/customers', customerRoutes);
 app.use("/api/auth", authRoutes);
 app.use('/api/carousel',carouselRoutes);    
